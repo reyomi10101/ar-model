@@ -20,6 +20,19 @@
       border: none;
       border-radius: 999px;
     }
+    #sound-btn {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      right: 16px;
+      z-index: 10;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      background: #000;
+      border: none;
+      border-radius: 999px;
+    }
   </style>
 </head>
 <body>
@@ -27,5 +40,43 @@
                 camera-controls auto-rotate>
     <button slot="ar-button" id="ar-btn">View in AR</button>
   </model-viewer>
+
+  <button id="sound-btn">Sound on</button>
+
+  <!-- 파일 이름에 띄어쓰기와 괄호가 있어서 %20 으로 적음 -->
+  <audio id="sound" src="Garden%20(1).m4a" loop preload="auto" playsinline></audio>
+
+  <script>
+    const sound = document.getElementById('sound');
+    const soundBtn = document.getElementById('sound-btn');
+    const arBtn = document.getElementById('ar-btn');
+
+    function updateLabel() {
+      soundBtn.textContent = sound.paused ? 'Sound on' : 'Sound off';
+    }
+
+    function playSound() {
+      sound.play().catch(() => {});
+    }
+
+    sound.addEventListener('play', updateLabel);
+    sound.addEventListener('pause', updateLabel);
+
+    // 소리 버튼: 켜기 / 끄기
+    soundBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (sound.paused) playSound(); else sound.pause();
+    });
+
+    // AR 버튼을 누르면 소리도 같이 시작
+    arBtn.addEventListener('click', playSound);
+
+    // 화면을 처음 한 번 건드리면 소리 시작 (브라우저가 자동재생을 막아서 터치가 필요함)
+    function firstTouch(e) {
+      if (e.target !== soundBtn) playSound();
+      document.removeEventListener('pointerdown', firstTouch);
+    }
+    document.addEventListener('pointerdown', firstTouch);
+  </script>
 </body>
 </html>
